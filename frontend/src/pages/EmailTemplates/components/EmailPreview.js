@@ -4,10 +4,12 @@ import {
   Typography,
   Paper,
   IconButton,
-  ToggleButtonGroup,
-  ToggleButton,
   CircularProgress
 } from "@material-ui/core";
+import {
+  ToggleButtonGroup,
+  ToggleButton
+} from "@material-ui/lab";
 import {
   Computer as DesktopIcon,
   PhoneIphone as MobileIcon,
