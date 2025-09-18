@@ -21,17 +21,12 @@ const ListEmailTemplatesService = async ({
   pageNumber = "1",
   active
 }: Request): Promise<Response> => {
-  console.log("=== LIST EMAIL TEMPLATES DEBUG ===");
-  console.log("companyId:", companyId);
-  console.log("searchParam:", searchParam);
-  console.log("pageNumber:", pageNumber);
-  console.log("active:", active);
 
   const whereCondition: any = {
     companyId
   };
 
-  if (active !== undefined) {
+  if (active !== undefined && active !== null) {
     whereCondition.active = active;
   }
 
@@ -64,9 +59,6 @@ const ListEmailTemplatesService = async ({
   const limit = 20;
   const offset = limit * (+pageNumber - 1);
 
-  console.log("whereCondition:", JSON.stringify(whereCondition, null, 2));
-  console.log("limit:", limit, "offset:", offset);
-
   const { count, rows: templates } = await EmailTemplate.findAndCountAll({
     where: whereCondition,
     limit,
@@ -81,10 +73,6 @@ const ListEmailTemplatesService = async ({
       }
     ]
   });
-
-  console.log("Found templates count:", count);
-  console.log("Templates length:", templates.length);
-  console.log("Templates data:", templates.map(t => ({ id: t.id, name: t.name, companyId: t.companyId })));
 
   const hasMore = count > offset + templates.length;
 

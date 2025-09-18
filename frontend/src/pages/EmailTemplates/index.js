@@ -90,20 +90,22 @@ const EmailTemplates = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [builderOpen, setBuilderOpen] = useState(false);
   const [stats, setStats] = useState(null);
+  const [showActiveOnly, setShowActiveOnly] = useState(false);
 
   useEffect(() => {
     loadTemplates();
     loadStats();
-  }, [searchParam]);
+  }, [searchParam, showActiveOnly]);
 
   const loadTemplates = useCallback(async () => {
     try {
       setLoading(true);
-      console.log("Loading templates with searchParam:", searchParam);
       const { data } = await api.get("/email-templates", {
-        params: { searchParam }
+        params: {
+          searchParam,
+          ...(showActiveOnly && { active: "true" })
+        }
       });
-      console.log("Templates loaded:", data);
       setTemplates(data.templates || []);
     } catch (err) {
       console.error("Error loading templates:", err);
@@ -111,13 +113,11 @@ const EmailTemplates = () => {
     } finally {
       setLoading(false);
     }
-  }, [searchParam]);
+  }, [searchParam, showActiveOnly]);
 
   const loadStats = async () => {
     try {
-      console.log("Loading stats...");
       const { data } = await api.get("/email-templates/all/stats");
-      console.log("Stats loaded:", data);
       setStats(data);
     } catch (err) {
       console.error("Erro ao carregar estatísticas:", err);
@@ -309,20 +309,31 @@ const EmailTemplates = () => {
           </Grid>
         )}
 
-        <TextField
-          fullWidth
-          placeholder="Pesquisar templates..."
-          value={searchParam}
-          onChange={(e) => setSearchParam(e.target.value)}
-          className={classes.searchField}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon />
-              </InputAdornment>
-            )
-          }}
-        />
+        <Box display="flex" gap={2} className={classes.searchField}>
+          <TextField
+            fullWidth
+            placeholder="Pesquisar templates..."
+            value={searchParam}
+            onChange={(e) => setSearchParam(e.target.value)}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon />
+                </InputAdornment>
+              )
+            }}
+          />
+          <FormControlLabel
+            control={
+              <Switch
+                checked={showActiveOnly}
+                onChange={(e) => setShowActiveOnly(e.target.checked)}
+                color="primary"
+              />
+            }
+            label="Apenas Ativos"
+          />
+        </Box>
 
         <TableContainer component={Paper} className={classes.tableContainer}>
           <Table>

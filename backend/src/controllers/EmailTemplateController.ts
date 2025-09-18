@@ -25,7 +25,7 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
       companyId,
       searchParam: searchParam as string,
       pageNumber: pageNumber as string,
-      active: active === "true"
+      active: active === "true" ? true : active === "false" ? false : undefined
     });
 
     console.log("Returning response:", { templatesCount: templates.length, count, hasMore });
