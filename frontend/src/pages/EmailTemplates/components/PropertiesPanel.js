@@ -47,7 +47,8 @@ const PropertiesPanel = ({
   setBlocks,
   settings,
   setSettings,
-  onInsertVariable
+  onInsertVariable,
+  onSelectBlock
 }) => {
   const classes = useStyles();
 
@@ -56,17 +57,26 @@ const PropertiesPanel = ({
 
     const updatedBlocks = blocks.map(block => {
       if (block.id === selectedBlock.id) {
+        let updatedBlock;
         if (field.includes(".")) {
           const [parent, child] = field.split(".");
-          return {
+          updatedBlock = {
             ...block,
             [parent]: {
               ...block[parent],
               [child]: value
             }
           };
+        } else {
+          updatedBlock = { ...block, [field]: value };
         }
-        return { ...block, [field]: value };
+
+        // Atualizar também o bloco selecionado para manter sincronia
+        if (onSelectBlock) {
+          onSelectBlock(updatedBlock);
+        }
+
+        return updatedBlock;
       }
       return block;
     });

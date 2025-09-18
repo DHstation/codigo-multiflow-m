@@ -97,18 +97,19 @@ const BlockRenderer = ({ block, isSelected, onSelect, onUpdate, onDelete, index,
   const renderBlockContent = () => {
     switch (block.type) {
       case "heading":
-        const HeadingTag = `h${block.content?.level || 1}`;
-        return (
-          <HeadingTag
-            style={{
+        const level = block.content?.level || 1;
+        const HeadingComponent = level === 1 ? "h1" : level === 2 ? "h2" : "h3";
+        return React.createElement(
+          HeadingComponent,
+          {
+            style: {
               margin: 0,
               color: block.styles?.color || "#333",
               textAlign: block.styles?.textAlign || "left",
               fontSize: block.styles?.fontSize || "inherit"
-            }}
-          >
-            {block.content?.text || "Título"}
-          </HeadingTag>
+            }
+          },
+          block.content?.text || "Título"
         );
 
       case "text":

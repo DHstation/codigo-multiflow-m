@@ -87,6 +87,16 @@ const EmailBuilder = ({ template, onClose, onSave }) => {
   const [previewText, setPreviewText] = useState("");
   const [blocks, setBlocks] = useState([]);
   const [selectedBlock, setSelectedBlock] = useState(null);
+
+  // Sincronizar selectedBlock com mudanças nos blocks
+  useEffect(() => {
+    if (selectedBlock) {
+      const updatedSelectedBlock = blocks.find(block => block.id === selectedBlock.id);
+      if (updatedSelectedBlock && JSON.stringify(updatedSelectedBlock) !== JSON.stringify(selectedBlock)) {
+        setSelectedBlock(updatedSelectedBlock);
+      }
+    }
+  }, [blocks, selectedBlock]);
   const [settings, setSettings] = useState({
     backgroundColor: "#f4f4f4",
     fontFamily: "Arial, sans-serif",
@@ -327,6 +337,7 @@ const EmailBuilder = ({ template, onClose, onSave }) => {
                       settings={settings}
                       setSettings={setSettings}
                       onInsertVariable={() => setVariableSelectorOpen(true)}
+                      onSelectBlock={setSelectedBlock}
                     />
                   )}
 
