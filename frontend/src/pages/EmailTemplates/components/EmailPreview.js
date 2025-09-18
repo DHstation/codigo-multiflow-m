@@ -36,11 +36,13 @@ const useStyles = makeStyles((theme) => ({
     overflow: "auto",
     backgroundColor: theme.palette.grey[100],
     borderRadius: theme.spacing(1),
-    padding: theme.spacing(2)
+    padding: theme.spacing(1), // Reduzido padding para mais espaço
+    minHeight: "calc(100vh - 350px)" // Altura mínima ainda maior
   },
   iframe: {
     width: "100%",
-    height: "100%",
+    height: "700px", // Altura fixa ainda maior
+    minHeight: "700px", // Altura mínima
     border: "none",
     backgroundColor: "white",
     borderRadius: theme.spacing(0.5),
@@ -48,13 +50,18 @@ const useStyles = makeStyles((theme) => ({
   },
   mobileFrame: {
     maxWidth: 375,
-    margin: "0 auto"
+    margin: "0 auto",
+    height: "700px", // Mesma altura do iframe
+    "& iframe": {
+      height: "700px" // Garante altura do iframe no mobile
+    }
   },
   loadingContainer: {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    height: "100%"
+    height: "700px", // Mesma altura do preview
+    minHeight: "700px"
   },
   metaInfo: {
     marginBottom: theme.spacing(2),

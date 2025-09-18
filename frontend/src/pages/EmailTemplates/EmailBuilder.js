@@ -83,8 +83,8 @@ const useStyles = makeStyles((theme) => ({
     borderBottom: `1px solid ${theme.palette.divider}`
   },
   tabContent: {
-    padding: theme.spacing(2),
-    height: "calc(100% - 48px)",
+    padding: theme.spacing(1), // Reduzido padding para mais espaço
+    height: "calc(100vh - 200px)", // Altura maior baseada na viewport
     overflowY: "auto"
   }
 }));
