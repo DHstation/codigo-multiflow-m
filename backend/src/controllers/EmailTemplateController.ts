@@ -13,17 +13,27 @@ import EmailLog from "../models/EmailLog";
 import { Op } from "sequelize";
 
 export const index = async (req: Request, res: Response): Promise<Response> => {
-  const { searchParam, pageNumber, active } = req.query;
-  const { companyId } = req.user;
+  try {
+    console.log("=== EMAIL TEMPLATE INDEX DEBUG ===");
+    const { searchParam, pageNumber, active } = req.query;
+    const { companyId } = req.user;
 
-  const { templates, count, hasMore } = await ListEmailTemplatesService({
-    companyId,
-    searchParam: searchParam as string,
-    pageNumber: pageNumber as string,
-    active: active === "true"
-  });
+    console.log("Query params:", { searchParam, pageNumber, active });
+    console.log("User companyId:", companyId);
 
-  return res.json({ templates, count, hasMore });
+    const { templates, count, hasMore } = await ListEmailTemplatesService({
+      companyId,
+      searchParam: searchParam as string,
+      pageNumber: pageNumber as string,
+      active: active === "true"
+    });
+
+    console.log("Returning response:", { templatesCount: templates.length, count, hasMore });
+    return res.json({ templates, count, hasMore });
+  } catch (error) {
+    console.error("Error in EmailTemplate index:", error);
+    throw error;
+  }
 };
 
 export const store = async (req: Request, res: Response): Promise<Response> => {
@@ -135,17 +145,21 @@ export const duplicate = async (req: Request, res: Response): Promise<Response> 
 };
 
 export const stats = async (req: Request, res: Response): Promise<Response> => {
-  const { templateId } = req.params;
-  const { companyId } = req.user;
-  const { startDate, endDate } = req.query;
+  try {
+    console.log("=== EMAIL STATS REQUEST ===");
+    const { templateId } = req.params;
+    const { companyId } = req.user;
+    const { startDate, endDate } = req.query;
 
-  const whereCondition: any = {
-    companyId
-  };
+    console.log("Stats params:", { templateId, companyId, startDate, endDate });
 
-  if (templateId && templateId !== "all") {
-    whereCondition.templateId = Number(templateId);
-  }
+    const whereCondition: any = {
+      companyId
+    };
+
+    if (templateId && templateId !== "all") {
+      whereCondition.templateId = Number(templateId);
+    }
 
   if (startDate) {
     whereCondition.createdAt = {
@@ -193,18 +207,33 @@ export const stats = async (req: Request, res: Response): Promise<Response> => {
     })
   ]);
 
-  // Buscar estatísticas da fila
-  const queueStats = await getQueueStats();
+    // Buscar estatísticas da fila
+    let queueStats;
+    try {
+      queueStats = await getQueueStats();
+    } catch (queueError) {
+      console.error("Error getting queue stats:", queueError);
+      queueStats = { waiting: 0, active: 0, completed: 0, failed: 0 };
+    }
 
-  return res.json({
-    emails: {
-      sent: totalSent,
-      failed: totalFailed,
-      opened: totalOpened,
-      clicked: totalClicked,
-      openRate: totalSent > 0 ? (totalOpened / totalSent) * 100 : 0,
-      clickRate: totalOpened > 0 ? (totalClicked / totalOpened) * 100 : 0
-    },
-    queue: queueStats
-  });
+    console.log("Stats result:", { totalSent, totalFailed, totalOpened, totalClicked, queueStats });
+
+    return res.json({
+      emails: {
+        sent: totalSent,
+        failed: totalFailed,
+        opened: totalOpened,
+        clicked: totalClicked,
+        openRate: totalSent > 0 ? (totalOpened / totalSent) * 100 : 0,
+        clickRate: totalOpened > 0 ? (totalClicked / totalOpened) * 100 : 0
+      },
+      queue: queueStats
+    });
+  } catch (error) {
+    console.error("Error in stats endpoint:", error);
+    return res.status(500).json({
+      error: "Error fetching stats",
+      details: error.message
+    });
+  }
 };

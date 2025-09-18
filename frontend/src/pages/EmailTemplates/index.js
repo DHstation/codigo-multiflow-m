@@ -99,12 +99,15 @@ const EmailTemplates = () => {
   const loadTemplates = useCallback(async () => {
     try {
       setLoading(true);
+      console.log("Loading templates with searchParam:", searchParam);
       const { data } = await api.get("/email-templates", {
         params: { searchParam }
       });
-      setTemplates(data.templates);
+      console.log("Templates loaded:", data);
+      setTemplates(data.templates || []);
     } catch (err) {
-      toast.error("Erro ao carregar templates de email");
+      console.error("Error loading templates:", err);
+      toast.error("Erro ao carregar templates de email: " + (err.response?.data?.message || err.message));
     } finally {
       setLoading(false);
     }
@@ -112,10 +115,17 @@ const EmailTemplates = () => {
 
   const loadStats = async () => {
     try {
+      console.log("Loading stats...");
       const { data } = await api.get("/email-templates/all/stats");
+      console.log("Stats loaded:", data);
       setStats(data);
     } catch (err) {
       console.error("Erro ao carregar estatísticas:", err);
+      // Se der erro nas estatísticas, não bloqueia a página
+      setStats({
+        emails: { sent: 0, openRate: 0, clickRate: 0 },
+        queue: { waiting: 0 }
+      });
     }
   };
 
