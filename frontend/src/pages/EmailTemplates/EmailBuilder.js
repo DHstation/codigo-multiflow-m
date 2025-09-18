@@ -66,7 +66,6 @@ const useStyles = makeStyles((theme) => ({
   },
   canvas: {
     height: "100%", // Usa altura total disponível
-    overflowY: "auto",
     padding: theme.spacing(2),
     backgroundColor: theme.palette.grey[50],
     display: "flex",
@@ -74,9 +73,10 @@ const useStyles = makeStyles((theme) => ({
   },
   canvasContent: {
     flexGrow: 1,
-    minHeight: "min-content",
-    overflowY: "auto", // Adiciona scroll específico para o conteúdo
-    maxHeight: "calc(100vh - 300px)" // Limita altura para forçar scroll
+    overflowY: "auto", // Scroll para o conteúdo
+    maxHeight: "calc(100vh - 320px)", // Altura reduzida para evitar corte
+    paddingRight: theme.spacing(1), // Espaço para a scrollbar
+    paddingBottom: theme.spacing(2) // Padding adicional na parte inferior
   },
   metadataSection: {
     padding: theme.spacing(2),

@@ -12,13 +12,12 @@ import { v4 as uuidv4 } from "uuid";
 const useStyles = makeStyles((theme) => ({
   canvas: {
     minHeight: 400,
-    maxHeight: "none", // Remove limitação de altura
     backgroundColor: "#ffffff",
     border: `2px dashed ${theme.palette.divider}`,
     borderRadius: theme.spacing(1),
     padding: theme.spacing(2),
-    position: "relative",
-    overflow: "visible" // Permite que o conteúdo seja visível
+    paddingBottom: theme.spacing(4), // Padding extra na parte inferior
+    position: "relative"
   },
   canvasActive: {
     borderColor: theme.palette.primary.main,
@@ -31,6 +30,8 @@ const useStyles = makeStyles((theme) => ({
     position: "relative",
     cursor: "pointer",
     transition: "all 0.3s ease",
+    width: "100%", // Garante largura total
+    boxSizing: "border-box", // Inclui border no cálculo da largura
     "&:hover": {
       borderColor: theme.palette.primary.main,
       "& $blockActions": {
@@ -364,8 +365,8 @@ const EmailCanvas = ({ blocks, setBlocks, selectedBlock, onSelectBlock, settings
   };
 
   return (
-    <Box mt={2} style={{ height: "100%", display: "flex", flexDirection: "column" }}>
-      <Typography variant="h6" gutterBottom style={{ flexShrink: 0 }}>
+    <Box mt={2}>
+      <Typography variant="h6" gutterBottom>
         Canvas do Email
       </Typography>
 
@@ -374,10 +375,7 @@ const EmailCanvas = ({ blocks, setBlocks, selectedBlock, onSelectBlock, settings
         className={`${classes.canvas} ${isOver ? classes.canvasActive : ""}`}
         style={{
           backgroundColor: settings?.backgroundColor || "#f4f4f4",
-          fontFamily: settings?.fontFamily || "Arial, sans-serif",
-          flexGrow: 1,
-          overflowY: "auto", // Garante scroll vertical
-          maxHeight: "100%" // Limita altura para ativar scroll
+          fontFamily: settings?.fontFamily || "Arial, sans-serif"
         }}
       >
         {blocks.length === 0 ? (
@@ -390,20 +388,28 @@ const EmailCanvas = ({ blocks, setBlocks, selectedBlock, onSelectBlock, settings
             </Typography>
           </Box>
         ) : (
-          blocks
-            .sort((a, b) => a.order - b.order)
-            .map((block, index) => (
-              <BlockRenderer
-                key={block.id}
-                block={block}
-                index={index}
-                isSelected={selectedBlock?.id === block.id}
-                onSelect={onSelectBlock}
-                onUpdate={handleUpdateBlock}
-                onDelete={handleDeleteBlock}
-                moveBlock={moveBlock}
-              />
-            ))
+          <Box style={{ width: "100%", paddingBottom: "80px" }}>
+            {blocks
+              .sort((a, b) => a.order - b.order)
+              .map((block, index) => (
+                <Box
+                  key={block.id}
+                  style={{
+                    marginBottom: index === blocks.length - 1 ? "40px" : "0" // Margem extra no último bloco
+                  }}
+                >
+                  <BlockRenderer
+                    block={block}
+                    index={index}
+                    isSelected={selectedBlock?.id === block.id}
+                    onSelect={onSelectBlock}
+                    onUpdate={handleUpdateBlock}
+                    onDelete={handleDeleteBlock}
+                    moveBlock={moveBlock}
+                  />
+                </Box>
+              ))}
+          </Box>
         )}
       </Box>
     </Box>
