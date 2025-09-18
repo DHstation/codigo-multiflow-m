@@ -12,11 +12,13 @@ import { v4 as uuidv4 } from "uuid";
 const useStyles = makeStyles((theme) => ({
   canvas: {
     minHeight: 400,
+    maxHeight: "none", // Remove limitação de altura
     backgroundColor: "#ffffff",
     border: `2px dashed ${theme.palette.divider}`,
     borderRadius: theme.spacing(1),
     padding: theme.spacing(2),
-    position: "relative"
+    position: "relative",
+    overflow: "visible" // Permite que o conteúdo seja visível
   },
   canvasActive: {
     borderColor: theme.palette.primary.main,
@@ -362,8 +364,8 @@ const EmailCanvas = ({ blocks, setBlocks, selectedBlock, onSelectBlock, settings
   };
 
   return (
-    <Box mt={2}>
-      <Typography variant="h6" gutterBottom>
+    <Box mt={2} style={{ height: "100%", display: "flex", flexDirection: "column" }}>
+      <Typography variant="h6" gutterBottom style={{ flexShrink: 0 }}>
         Canvas do Email
       </Typography>
 
@@ -372,7 +374,10 @@ const EmailCanvas = ({ blocks, setBlocks, selectedBlock, onSelectBlock, settings
         className={`${classes.canvas} ${isOver ? classes.canvasActive : ""}`}
         style={{
           backgroundColor: settings?.backgroundColor || "#f4f4f4",
-          fontFamily: settings?.fontFamily || "Arial, sans-serif"
+          fontFamily: settings?.fontFamily || "Arial, sans-serif",
+          flexGrow: 1,
+          overflowY: "auto", // Garante scroll vertical
+          maxHeight: "100%" // Limita altura para ativar scroll
         }}
       >
         {blocks.length === 0 ? (

@@ -51,11 +51,12 @@ const useStyles = makeStyles((theme) => ({
   },
   content: {
     padding: 0,
-    height: "calc(100% - 64px)",
+    height: "calc(100vh - 64px)", // Altura fixa baseada na viewport
     overflow: "hidden"
   },
   gridContainer: {
-    height: "100%"
+    height: "100%",
+    maxHeight: "calc(100vh - 64px)" // Garante altura máxima
   },
   panel: {
     height: "100%",
@@ -64,10 +65,18 @@ const useStyles = makeStyles((theme) => ({
     borderRight: `1px solid ${theme.palette.divider}`
   },
   canvas: {
-    height: "100%",
+    height: "100%", // Usa altura total disponível
     overflowY: "auto",
     padding: theme.spacing(2),
-    backgroundColor: theme.palette.grey[50]
+    backgroundColor: theme.palette.grey[50],
+    display: "flex",
+    flexDirection: "column"
+  },
+  canvasContent: {
+    flexGrow: 1,
+    minHeight: "min-content",
+    overflowY: "auto", // Adiciona scroll específico para o conteúdo
+    maxHeight: "calc(100vh - 300px)" // Limita altura para forçar scroll
   },
   metadataSection: {
     padding: theme.spacing(2),
@@ -300,16 +309,18 @@ const EmailBuilder = ({ template, onClose, onSave }) => {
 
                 <Divider />
 
-                <EmailCanvas
-                  blocks={blocks}
-                  setBlocks={(newBlocks) => {
-                    setBlocks(newBlocks);
-                    addToHistory(newBlocks);
-                  }}
-                  selectedBlock={selectedBlock}
-                  onSelectBlock={setSelectedBlock}
-                  settings={settings}
-                />
+                <Box className={classes.canvasContent}>
+                  <EmailCanvas
+                    blocks={blocks}
+                    setBlocks={(newBlocks) => {
+                      setBlocks(newBlocks);
+                      addToHistory(newBlocks);
+                    }}
+                    selectedBlock={selectedBlock}
+                    onSelectBlock={setSelectedBlock}
+                    settings={settings}
+                  />
+                </Box>
               </Box>
             </Grid>
 
