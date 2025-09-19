@@ -1,7 +1,10 @@
 import { Router } from "express";
 import isAuth from "../middleware/isAuth";
+import uploadConfig from "../config/upload";
+import multer from "multer";
 import * as EmailTemplateController from "../controllers/EmailTemplateController";
 
+const upload = multer(uploadConfig);
 const emailTemplateRoutes = Router();
 
 // Todas as rotas requerem autenticação
@@ -16,6 +19,10 @@ emailTemplateRoutes.get("/email-templates/all/stats", EmailTemplateController.st
 emailTemplateRoutes.get("/email-templates/:templateId/stats", EmailTemplateController.stats);
 emailTemplateRoutes.post("/email-templates/:templateId/preview", EmailTemplateController.preview);
 emailTemplateRoutes.post("/email-templates/:templateId/duplicate", EmailTemplateController.duplicate);
+
+// Upload de imagens para templates
+//@ts-ignore
+emailTemplateRoutes.post("/email-templates/upload-image", upload.array("medias"), EmailTemplateController.uploadImage);
 
 // Rotas com parâmetros devem vir por último
 emailTemplateRoutes.get("/email-templates/:templateId", EmailTemplateController.show);

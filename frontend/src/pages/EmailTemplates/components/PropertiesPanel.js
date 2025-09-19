@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Box,
   Typography,
@@ -13,13 +13,21 @@ import {
   IconButton,
   InputAdornment,
   Switch,
-  FormControlLabel
+  FormControlLabel,
+  CircularProgress,
+  Tabs,
+  Tab
 } from "@material-ui/core";
 import {
   FormatColorFill as ColorIcon,
-  Code as VariableIcon
+  Code as VariableIcon,
+  CloudUpload as UploadIcon,
+  Link as LinkIcon,
+  Image as ImageIcon
 } from "@material-ui/icons";
 import { makeStyles } from "@material-ui/core/styles";
+import { toast } from "react-toastify";
+import api from "../../../services/api";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -38,6 +46,26 @@ const useStyles = makeStyles((theme) => ({
     textAlign: "center",
     padding: theme.spacing(4),
     color: theme.palette.text.secondary
+  },
+  uploadButton: {
+    marginTop: theme.spacing(1),
+    marginBottom: theme.spacing(1)
+  },
+  uploadInput: {
+    display: "none"
+  },
+  previewImage: {
+    maxWidth: "100%",
+    maxHeight: 150,
+    borderRadius: theme.spacing(0.5),
+    marginTop: theme.spacing(1),
+    border: `1px solid ${theme.palette.divider}`
+  },
+  uploadTab: {
+    minWidth: 80
+  },
+  tabPanel: {
+    marginTop: theme.spacing(2)
   }
 }));
 
@@ -51,6 +79,8 @@ const PropertiesPanel = ({
   onSelectBlock
 }) => {
   const classes = useStyles();
+  const [uploadLoading, setUploadLoading] = useState(false);
+  const [imageTabValue, setImageTabValue] = useState(0);
 
   const updateBlock = (field, value) => {
     if (!selectedBlock) return;
@@ -82,6 +112,58 @@ const PropertiesPanel = ({
     });
 
     setBlocks(updatedBlocks);
+  };
+
+  const handleImageUpload = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Validar tipo de arquivo
+    if (!file.type.startsWith('image/')) {
+      toast.error("Por favor, selecione apenas arquivos de imagem");
+      return;
+    }
+
+    // Validar tamanho (máximo 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("A imagem deve ter no máximo 5MB");
+      return;
+    }
+
+    setUploadLoading(true);
+
+    try {
+      const formData = new FormData();
+      formData.append("medias", file);
+      formData.append("typeArch", "emailTemplate");
+
+      const response = await api.post("/email-templates/upload-image", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data"
+        }
+      });
+
+      if (response.data && response.data.length > 0) {
+        const uploadedFile = response.data[0];
+        const imageUrl = uploadedFile.url || `${process.env.REACT_APP_BACKEND_URL}/public/${uploadedFile.path}`;
+
+        updateBlock("content.src", imageUrl);
+
+        // Se não há texto alternativo, usar o nome do arquivo
+        if (!selectedBlock.content?.alt) {
+          updateBlock("content.alt", file.name.split('.')[0]);
+        }
+
+        toast.success("Imagem enviada com sucesso!");
+      }
+    } catch (error) {
+      console.error("Erro ao fazer upload:", error);
+      toast.error("Erro ao enviar imagem: " + (error.response?.data?.message || error.message));
+    } finally {
+      setUploadLoading(false);
+      // Limpar o input para permitir re-upload do mesmo arquivo
+      event.target.value = "";
+    }
   };
 
   const renderBlockProperties = () => {
@@ -284,17 +366,112 @@ const PropertiesPanel = ({
       case "image":
         return (
           <>
+            {/* Tabs para Upload ou URL */}
             <Box className={classes.propertyGroup}>
-              <TextField
-                fullWidth
-                label="URL da Imagem"
-                value={selectedBlock.content?.src || ""}
-                onChange={(e) => updateBlock("content.src", e.target.value)}
-                margin="normal"
-                helperText="Cole a URL da imagem aqui"
-              />
+              <Tabs
+                value={imageTabValue}
+                onChange={(e, newValue) => setImageTabValue(newValue)}
+                variant="fullWidth"
+                indicatorColor="primary"
+                textColor="primary"
+              >
+                <Tab
+                  label="Upload"
+                  icon={<UploadIcon />}
+                  className={classes.uploadTab}
+                />
+                <Tab
+                  label="URL"
+                  icon={<LinkIcon />}
+                  className={classes.uploadTab}
+                />
+              </Tabs>
             </Box>
 
+            {/* Tab Panel Upload */}
+            {imageTabValue === 0 && (
+              <Box className={classes.tabPanel}>
+                <input
+                  accept="image/*"
+                  className={classes.uploadInput}
+                  id="image-upload-input"
+                  type="file"
+                  onChange={handleImageUpload}
+                />
+                <label htmlFor="image-upload-input">
+                  <Button
+                    variant="outlined"
+                    component="span"
+                    startIcon={uploadLoading ? <CircularProgress size={20} /> : <UploadIcon />}
+                    disabled={uploadLoading}
+                    fullWidth
+                    className={classes.uploadButton}
+                  >
+                    {uploadLoading ? "Enviando..." : "Enviar Imagem"}
+                  </Button>
+                </label>
+                <Typography variant="caption" color="textSecondary" display="block">
+                  Formatos: JPG, PNG, GIF, SVG, WebP (máx. 5MB)
+                </Typography>
+
+                {/* Preview da imagem atual */}
+                {selectedBlock.content?.src && (
+                  <Box mt={2}>
+                    <Typography variant="subtitle2" gutterBottom>
+                      Preview:
+                    </Typography>
+                    <img
+                      src={selectedBlock.content.src}
+                      alt={selectedBlock.content?.alt || "Preview"}
+                      className={classes.previewImage}
+                      onError={(e) => {
+                        e.target.style.display = "none";
+                      }}
+                    />
+                  </Box>
+                )}
+              </Box>
+            )}
+
+            {/* Tab Panel URL */}
+            {imageTabValue === 1 && (
+              <Box className={classes.tabPanel}>
+                <TextField
+                  fullWidth
+                  label="URL da Imagem"
+                  value={selectedBlock.content?.src || ""}
+                  onChange={(e) => updateBlock("content.src", e.target.value)}
+                  margin="normal"
+                  helperText="Cole a URL da imagem aqui"
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <ImageIcon fontSize="small" />
+                      </InputAdornment>
+                    )
+                  }}
+                />
+
+                {/* Preview da imagem por URL */}
+                {selectedBlock.content?.src && imageTabValue === 1 && (
+                  <Box mt={2}>
+                    <Typography variant="subtitle2" gutterBottom>
+                      Preview:
+                    </Typography>
+                    <img
+                      src={selectedBlock.content.src}
+                      alt={selectedBlock.content?.alt || "Preview"}
+                      className={classes.previewImage}
+                      onError={(e) => {
+                        e.target.style.display = "none";
+                      }}
+                    />
+                  </Box>
+                )}
+              </Box>
+            )}
+
+            {/* Propriedades Comuns */}
             <Box className={classes.propertyGroup}>
               <TextField
                 fullWidth
@@ -314,6 +491,13 @@ const PropertiesPanel = ({
                 onChange={(e) => updateBlock("content.url", e.target.value)}
                 margin="normal"
                 helperText="URL ao clicar na imagem"
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <LinkIcon fontSize="small" />
+                    </InputAdornment>
+                  )
+                }}
               />
             </Box>
 

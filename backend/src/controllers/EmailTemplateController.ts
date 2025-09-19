@@ -11,6 +11,7 @@ import DuplicateEmailTemplateService from "../services/EmailTemplateService/Dupl
 import { getQueueStats } from "../queues/EmailQueue";
 import EmailLog from "../models/EmailLog";
 import { Op } from "sequelize";
+import { head } from "lodash";
 
 export const index = async (req: Request, res: Response): Promise<Response> => {
   try {
@@ -233,6 +234,63 @@ export const stats = async (req: Request, res: Response): Promise<Response> => {
     console.error("Error in stats endpoint:", error);
     return res.status(500).json({
       error: "Error fetching stats",
+      details: error.message
+    });
+  }
+};
+
+export const uploadImage = async (req: Request, res: Response): Promise<Response> => {
+  try {
+    const { companyId } = req.user;
+    const files = req.files as any[];
+
+    if (!files || files.length === 0) {
+      return res.status(400).json({ error: "Nenhum arquivo enviado" });
+    }
+
+    const file = head(files);
+
+    if (!file) {
+      return res.status(400).json({ error: "Arquivo inválido" });
+    }
+
+    // Validar se é uma imagem
+    if (!file.mimetype.startsWith('image/')) {
+      return res.status(400).json({ error: "Apenas arquivos de imagem são permitidos" });
+    }
+
+    // Construir a URL do arquivo
+    const baseUrl = (process as any).env.BACKEND_URL || `${req.protocol}://${req.get("host")}`;
+    const filePath = file.path.replace(/\\/g, "/");
+    const relativePath = filePath.split("/public/")[1];
+
+    if (!relativePath) {
+      return res.status(500).json({ error: "Erro ao processar caminho do arquivo" });
+    }
+
+    const fileUrl = `${baseUrl}/public/${relativePath}`;
+
+    console.log("Image upload successful:", {
+      originalName: file.originalname,
+      filename: file.filename,
+      path: relativePath,
+      url: fileUrl,
+      companyId
+    });
+
+    return res.json([{
+      path: relativePath,
+      url: fileUrl,
+      filename: file.filename,
+      originalName: file.originalname,
+      mimetype: file.mimetype,
+      size: file.size
+    }]);
+
+  } catch (error) {
+    console.error("Error uploading image:", error);
+    return res.status(500).json({
+      error: "Erro no upload da imagem",
       details: error.message
     });
   }
