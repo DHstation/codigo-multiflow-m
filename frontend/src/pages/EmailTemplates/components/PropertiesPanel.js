@@ -130,7 +130,11 @@ const PropertiesPanel = ({
                 <FormLabel>Nível do Título</FormLabel>
                 <Select
                   value={selectedBlock.content?.level || 1}
-                  onChange={(e) => updateBlock("content.level", e.target.value)}
+                  onChange={(e) => {
+                    updateBlock("content.level", e.target.value);
+                    // Limpar fontSize para usar o tamanho padrão do nível
+                    updateBlock("styles.fontSize", "");
+                  }}
                 >
                   <MenuItem value={1}>H1 - Título Principal</MenuItem>
                   <MenuItem value={2}>H2 - Subtítulo</MenuItem>
@@ -168,10 +172,11 @@ const PropertiesPanel = ({
               <TextField
                 fullWidth
                 label="Tamanho da Fonte"
-                value={selectedBlock.styles?.fontSize || "24px"}
+                value={selectedBlock.styles?.fontSize || ""}
                 onChange={(e) => updateBlock("styles.fontSize", e.target.value)}
                 margin="normal"
-                helperText="Ex: 24px, 1.5em, 2rem"
+                placeholder="Automático baseado no nível"
+                helperText="Ex: 24px, 1.5em, 2rem (deixe vazio para tamanho automático)"
               />
             </Box>
           </>
