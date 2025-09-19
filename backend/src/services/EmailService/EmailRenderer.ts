@@ -242,21 +242,28 @@ class EmailRenderer {
       return "";
     }
 
+    const imgTag = `<img
+      src="${content.src}"
+      alt="${content.alt || ""}"
+      width="${width}"
+      height="${height}"
+      style="
+        display: block;
+        border: 0;
+        max-width: 100%;
+        border-radius: ${borderRadius};
+      "
+    />`;
+
     return `
       <tr>
         <td align="${textAlign}" style="padding: ${padding};">
-          <img
-            src="${content.src}"
-            alt="${content.alt || ""}"
-            width="${width}"
-            height="${height}"
-            style="
-              display: block;
-              border: 0;
-              max-width: 100%;
-              border-radius: ${borderRadius};
-            "
-          />
+          ${content?.url ?
+            `<a href="${content.url}" target="_blank" rel="noopener noreferrer" style="display: block;">
+              ${imgTag}
+            </a>` :
+            imgTag
+          }
         </td>
       </tr>
     `;

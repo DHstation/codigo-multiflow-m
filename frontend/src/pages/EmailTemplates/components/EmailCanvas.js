@@ -136,15 +136,35 @@ const BlockRenderer = ({ block, isSelected, onSelect, onUpdate, onDelete, index,
         return (
           <Box textAlign={block.styles?.textAlign || "center"}>
             {block.content?.src ? (
-              <img
-                src={block.content.src}
-                alt={block.content.alt || "Imagem"}
-                style={{
-                  maxWidth: "100%",
-                  height: "auto",
-                  width: block.styles?.width || "auto"
-                }}
-              />
+              block.content?.url ? (
+                <Box
+                  component="a"
+                  href={block.content.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ display: "block" }}
+                >
+                  <img
+                    src={block.content.src}
+                    alt={block.content.alt || "Imagem"}
+                    style={{
+                      maxWidth: "100%",
+                      height: "auto",
+                      width: block.styles?.width || "auto"
+                    }}
+                  />
+                </Box>
+              ) : (
+                <img
+                  src={block.content.src}
+                  alt={block.content.alt || "Imagem"}
+                  style={{
+                    maxWidth: "100%",
+                    height: "auto",
+                    width: block.styles?.width || "auto"
+                  }}
+                />
+              )
             ) : (
               <Box
                 p={2}
