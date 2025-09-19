@@ -164,7 +164,10 @@ const BlockRenderer = ({ block, isSelected, onSelect, onUpdate, onDelete, index,
         return (
           <Box textAlign={block.styles?.textAlign || "center"}>
             <Box
-              component="span"
+              component="a"
+              href={block.content?.url || "#"}
+              target="_blank"
+              rel="noopener noreferrer"
               style={{
                 display: "inline-block",
                 padding: "12px 24px",

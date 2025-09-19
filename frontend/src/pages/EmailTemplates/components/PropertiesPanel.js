@@ -131,9 +131,32 @@ const PropertiesPanel = ({
                 <Select
                   value={selectedBlock.content?.level || 1}
                   onChange={(e) => {
-                    updateBlock("content.level", e.target.value);
-                    // Limpar fontSize para usar o tamanho padrão do nível
-                    updateBlock("styles.fontSize", "");
+                    // Atualizar nível e limpar fontSize em uma única operação
+                    const updatedBlocks = blocks.map(block => {
+                      if (block.id === selectedBlock.id) {
+                        const updatedBlock = {
+                          ...block,
+                          content: {
+                            ...block.content,
+                            level: e.target.value
+                          },
+                          styles: {
+                            ...block.styles,
+                            fontSize: "" // Limpar para usar tamanho automático
+                          }
+                        };
+
+                        // Atualizar bloco selecionado
+                        if (onSelectBlock) {
+                          onSelectBlock(updatedBlock);
+                        }
+
+                        return updatedBlock;
+                      }
+                      return block;
+                    });
+
+                    setBlocks(updatedBlocks);
                   }}
                 >
                   <MenuItem value={1}>H1 - Título Principal</MenuItem>
