@@ -84,7 +84,7 @@ const useStyles = makeStyles((theme) => ({
   },
   tabContent: {
     padding: theme.spacing(1), // Reduzido padding para mais espaço
-    height: "calc(100vh - 200px)", // Altura maior baseada na viewport
+    height: "calc(100vh - 140px)", // Altura ainda maior para comportar iframe de 700px
     overflowY: "auto"
   }
 }));

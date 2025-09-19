@@ -36,8 +36,9 @@ const useStyles = makeStyles((theme) => ({
     overflow: "auto",
     backgroundColor: theme.palette.grey[100],
     borderRadius: theme.spacing(1),
-    padding: theme.spacing(1), // Reduzido padding para mais espaço
-    minHeight: "calc(100vh - 350px)" // Altura mínima ainda maior
+    padding: theme.spacing(1),
+    minHeight: "750px", // Altura fixa maior que o iframe (700px) + espaço para controles
+    maxHeight: "calc(100vh - 200px)" // Altura máxima baseada na viewport
   },
   iframe: {
     width: "100%",
