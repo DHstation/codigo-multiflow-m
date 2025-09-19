@@ -128,7 +128,14 @@ const EmailBuilder = ({ template, onClose, onSave }) => {
       setSubject(template.subject || "");
       setPreviewText(template.previewText || "");
       setBlocks(template.blocks || []);
-      setSettings(template.settings || settings);
+
+      // Garantir que containerWidth seja pelo menos 600px
+      const templateSettings = template.settings || settings;
+      const correctedSettings = {
+        ...templateSettings,
+        containerWidth: Math.max(templateSettings.containerWidth || 600, 600)
+      };
+      setSettings(correctedSettings);
     }
   }, [template]);
 
