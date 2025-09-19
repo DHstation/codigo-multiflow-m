@@ -306,18 +306,19 @@ class EmailRenderer {
    * Renderiza um divisor
    */
   private renderDivider(styles: any): string {
-    const color = styles.color || "#dddddd";
-    const height = styles.height || "1px";
-    const margin = this.getMarginStyle(styles.margin || { top: 20, bottom: 20 });
+    const thickness = styles?.thickness || 1;
+    const style = styles?.style || "solid";
+    const color = styles?.color || "#ddd";
+    const spacing = styles?.spacing || 16;
 
     return `
       <tr>
-        <td style="padding: ${margin};">
-          <table border="0" cellpadding="0" cellspacing="0" width="100%">
-            <tr>
-              <td style="border-top: ${height} solid ${color};"></td>
-            </tr>
-          </table>
+        <td style="padding: 0;">
+          <hr style="
+            border: none;
+            border-top: ${thickness}px ${style} ${color};
+            margin: ${spacing}px 0;
+          "/>
         </td>
       </tr>
     `;
