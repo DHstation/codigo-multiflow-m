@@ -37,7 +37,7 @@ const useStyles = makeStyles((theme) => ({
     marginBottom: theme.spacing(3)
   },
   propertyGroup: {
-    marginBottom: theme.spacing(2)
+    marginBottom: theme.spacing(1.5) // Reduzido de 2 para 1.5
   },
   colorInput: {
     marginTop: theme.spacing(1)
@@ -56,16 +56,28 @@ const useStyles = makeStyles((theme) => ({
   },
   previewImage: {
     maxWidth: "100%",
-    maxHeight: 150,
+    maxHeight: 120, // Reduzido de 150 para 120
     borderRadius: theme.spacing(0.5),
     marginTop: theme.spacing(1),
-    border: `1px solid ${theme.palette.divider}`
+    border: `1px solid ${theme.palette.divider}`,
+    objectFit: "contain" // Mantém proporção
   },
   uploadTab: {
-    minWidth: 80
+    minWidth: 80,
+    minHeight: 40, // Reduz altura das tabs
+    fontSize: "0.8rem" // Fonte menor
   },
   tabPanel: {
-    marginTop: theme.spacing(2)
+    marginTop: theme.spacing(1), // Reduzido de 2 para 1
+    paddingBottom: theme.spacing(2) // Adiciona padding para evitar corte
+  },
+  imageProperties: {
+    paddingBottom: theme.spacing(6), // Aumentado para garantir scroll
+    marginBottom: theme.spacing(2)
+  },
+  propertyContainer: {
+    maxHeight: "none", // Remove limitação de altura
+    overflowY: "visible" // Permite overflow visível
   }
 }));
 
@@ -365,7 +377,7 @@ const PropertiesPanel = ({
 
       case "image":
         return (
-          <>
+          <Box className={classes.imageProperties}>
             {/* Tabs para Upload ou URL */}
             <Box className={classes.propertyGroup}>
               <Tabs
@@ -416,8 +428,8 @@ const PropertiesPanel = ({
 
                 {/* Preview da imagem atual */}
                 {selectedBlock.content?.src && (
-                  <Box mt={2}>
-                    <Typography variant="subtitle2" gutterBottom>
+                  <Box mt={1.5}> {/* Reduzido de mt={2} */}
+                    <Typography variant="caption" gutterBottom> {/* Mudado de subtitle2 para caption */}
                       Preview:
                     </Typography>
                     <img
@@ -454,8 +466,8 @@ const PropertiesPanel = ({
 
                 {/* Preview da imagem por URL */}
                 {selectedBlock.content?.src && imageTabValue === 1 && (
-                  <Box mt={2}>
-                    <Typography variant="subtitle2" gutterBottom>
+                  <Box mt={1.5}> {/* Reduzido de mt={2} */}
+                    <Typography variant="caption" gutterBottom> {/* Mudado de subtitle2 para caption */}
                       Preview:
                     </Typography>
                     <img
@@ -525,7 +537,7 @@ const PropertiesPanel = ({
                 </Select>
               </FormControl>
             </Box>
-          </>
+          </Box>
         );
 
       case "button":
