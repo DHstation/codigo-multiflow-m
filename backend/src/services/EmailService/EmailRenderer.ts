@@ -327,12 +327,12 @@ class EmailRenderer {
    * Renderiza um espaçador
    */
   private renderSpacer(styles: any): string {
-    const height = styles.height || "20px";
+    const height = styles?.height || 20;
 
     return `
       <tr>
         <td style="padding: 0;">
-          <div style="height: ${height}; line-height: ${height}; font-size: 0;">
+          <div style="height: ${height}px; line-height: ${height}px; font-size: 0;">
             &nbsp;
           </div>
         </td>
