@@ -317,7 +317,7 @@ const EmailCanvas = ({ blocks, setBlocks, selectedBlock, onSelectBlock, settings
       case "button":
         return {
           ...baseBlock,
-          content: { text: "Clique Aqui", url: "#" },
+          content: { text: "Clique Aqui", url: "" },
           styles: { backgroundColor: "#007bff", color: "#ffffff", textAlign: "center" }
         };
       case "divider":
