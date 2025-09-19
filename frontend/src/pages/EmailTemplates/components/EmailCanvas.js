@@ -102,6 +102,8 @@ const BlockRenderer = ({ block, isSelected, onSelect, onUpdate, onDelete, index,
       case "heading":
         const level = block.content?.level || 1;
         const HeadingComponent = level === 1 ? "h1" : level === 2 ? "h2" : "h3";
+        const defaultFontSizes = { 1: "32px", 2: "24px", 3: "18px" };
+        const fontSize = block.styles?.fontSize || defaultFontSizes[level] || "24px";
         return React.createElement(
           HeadingComponent,
           {
@@ -109,7 +111,7 @@ const BlockRenderer = ({ block, isSelected, onSelect, onUpdate, onDelete, index,
               margin: 0,
               color: block.styles?.color || "#333",
               textAlign: block.styles?.textAlign || "left",
-              fontSize: block.styles?.fontSize || "inherit"
+              fontSize: fontSize
             }
           },
           block.content?.text || "Título"

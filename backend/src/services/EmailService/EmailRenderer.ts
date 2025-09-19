@@ -174,17 +174,19 @@ class EmailRenderer {
    * Renderiza um título
    */
   private renderHeading(content: any, styles: any): string {
-    const fontSize = styles.fontSize || "24px";
-    const color = styles.color || "#333333";
-    const textAlign = styles.textAlign || "left";
-    const fontWeight = styles.fontWeight || "bold";
-    const padding = this.getPaddingStyle(styles.padding);
-    const margin = this.getMarginStyle(styles.margin);
+    const level = content?.level || 1;
+    const defaultFontSizes = { 1: "32px", 2: "24px", 3: "18px" };
+    const fontSize = styles?.fontSize || defaultFontSizes[level] || "24px";
+    const color = styles?.color || "#333333";
+    const textAlign = styles?.textAlign || "left";
+    const fontWeight = styles?.fontWeight || "bold";
+    const padding = this.getPaddingStyle(styles?.padding);
+    const margin = this.getMarginStyle(styles?.margin);
 
     return `
       <tr>
         <td style="padding: ${padding}; margin: ${margin};">
-          <h2 style="
+          <h${level} style="
             margin: 0;
             font-size: ${fontSize};
             color: ${color};
@@ -192,7 +194,7 @@ class EmailRenderer {
             font-weight: ${fontWeight};
             font-family: inherit;
             line-height: 1.4;
-          ">${content.text || ""}</h2>
+          ">${content?.text || ""}</h${level}>
         </td>
       </tr>
     `;

@@ -99,10 +99,12 @@ const EmailPreview = ({ blocks, settings, subject, previewText, templateId }) =>
       switch (block.type) {
         case "heading":
           const HeadingTag = `h${block.content?.level || 1}`;
+          const defaultFontSizes = { 1: "32px", 2: "24px", 3: "18px" };
+          const fontSize = block.styles?.fontSize || defaultFontSizes[block.content?.level || 1] || "24px";
           return `<${HeadingTag} style="
             color: ${block.styles?.color || "#333"};
             text-align: ${block.styles?.textAlign || "left"};
-            font-size: ${block.styles?.fontSize || "24px"};
+            font-size: ${fontSize};
             margin: 0 0 16px 0;
           ">${block.content?.text || "Título"}</${HeadingTag}>`;
 
