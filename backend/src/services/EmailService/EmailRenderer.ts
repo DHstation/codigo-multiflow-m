@@ -331,8 +331,10 @@ class EmailRenderer {
 
     return `
       <tr>
-        <td style="height: ${height}; line-height: ${height}; font-size: 0;">
-          &nbsp;
+        <td style="padding: 0;">
+          <div style="height: ${height}; line-height: ${height}; font-size: 0;">
+            &nbsp;
+          </div>
         </td>
       </tr>
     `;
