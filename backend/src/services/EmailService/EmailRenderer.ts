@@ -283,8 +283,8 @@ class EmailRenderer {
             <tr>
               <td align="center" style="border-radius: ${borderRadius};" bgcolor="${backgroundColor}">
                 <a
-                  href="${content?.url || "#"}"
-                  target="_blank"
+                  href="${content?.url || ""}"
+                  target="${content?.url ? "_blank" : "_self"}"
                   rel="noopener noreferrer"
                   style="
                     display: inline-block;

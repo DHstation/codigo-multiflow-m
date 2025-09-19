@@ -138,7 +138,7 @@ const EmailPreview = ({ blocks, settings, subject, previewText, templateId }) =>
 
         case "button":
           return `<div style="text-align: ${block.styles?.textAlign || "center"}; margin: 0 0 16px 0;">
-            <a href="${block.content?.url || "#"}" style="
+            <a href="${block.content?.url || ""}" style="
               display: inline-block;
               padding: 12px 24px;
               background-color: ${block.styles?.backgroundColor || "#007bff"};
