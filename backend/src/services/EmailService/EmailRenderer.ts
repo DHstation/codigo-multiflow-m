@@ -283,8 +283,9 @@ class EmailRenderer {
             <tr>
               <td align="center" style="border-radius: ${borderRadius};" bgcolor="${backgroundColor}">
                 <a
-                  href="${content.href || "#"}"
-                  target="${content.target || "_blank"}"
+                  href="${content?.url || "#"}"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   style="
                     display: inline-block;
                     padding: ${paddingStr};
@@ -295,7 +296,7 @@ class EmailRenderer {
                     border-radius: ${borderRadius};
                     background-color: ${backgroundColor};
                   "
-                >${content.buttonText || "Clique aqui"}</a>
+                >${content?.text || "Botão"}</a>
               </td>
             </tr>
           </table>
