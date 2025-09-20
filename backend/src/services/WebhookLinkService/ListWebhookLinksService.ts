@@ -1,6 +1,7 @@
 import { Op } from "sequelize";
 import WebhookLink from "../../models/WebhookLink";
 import { FlowBuilderModel } from "../../models/FlowBuilder";
+import EmailTemplate from "../../models/EmailTemplate";
 import User from "../../models/User";
 
 interface Request {
@@ -40,7 +41,14 @@ const ListWebhookLinksService = async ({
       {
         model: FlowBuilderModel,
         as: 'flow',
-        attributes: ['id', 'name', 'active']
+        attributes: ['id', 'name', 'active'],
+        required: false
+      },
+      {
+        model: EmailTemplate,
+        as: 'emailTemplate',
+        attributes: ['id', 'name', 'subject', 'active'],
+        required: false
       },
       {
         model: User,

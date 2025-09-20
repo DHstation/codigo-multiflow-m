@@ -28,7 +28,11 @@ import {
   CardContent,
   CircularProgress,
   InputAdornment,
-  Grid
+  Grid,
+  FormControlLabel,
+  RadioGroup,
+  Radio,
+  Divider
 } from "@material-ui/core";
 import {
   Add as AddIcon,
@@ -39,7 +43,9 @@ import {
   CheckCircle as CheckIcon,
   Warning as WarningIcon,
   Search as SearchIcon,
-  Visibility as ViewIcon
+  Visibility as ViewIcon,
+  Email as EmailIcon,
+  AccountTree as FlowIcon
 } from "@material-ui/icons";
 
 import MainContainer from "../../components/MainContainer";
@@ -116,6 +122,7 @@ const WebhookLinks = () => {
   const [loading, setLoading] = useState(false);
   const [webhookLinks, setWebhookLinks] = useState([]);
   const [flows, setFlows] = useState([]);
+  const [emailTemplates, setEmailTemplates] = useState([]);
   const [selectedWebhook, setSelectedWebhook] = useState(null);
   const [confirmationOpen, setConfirmationOpen] = useState(false);
   const [deleteId, setDeleteId] = useState(null);
@@ -126,7 +133,16 @@ const WebhookLinks = () => {
     name: "",
     description: "",
     platform: "generic",
+    actionType: "flow",
     flowId: "",
+    emailTemplateId: "",
+    emailSettings: {
+      sendDelay: 0,
+      delayType: "immediate",
+      fromName: "",
+      fromEmail: "",
+      replyTo: ""
+    },
     active: true
   });
 
@@ -144,6 +160,7 @@ const WebhookLinks = () => {
   useEffect(() => {
     loadWebhookLinks();
     loadFlows();
+    loadEmailTemplates();
   }, []);
 
   const loadWebhookLinks = async () => {
@@ -169,13 +186,31 @@ const WebhookLinks = () => {
     }
   };
 
+  const loadEmailTemplates = async () => {
+    try {
+      const { data } = await api.get("/email-templates");
+      setEmailTemplates(data.templates || []);
+    } catch (err) {
+      toastError(err);
+    }
+  };
+
   const handleOpenModal = (webhook = null) => {
     if (webhook) {
       setFormData({
         name: webhook.name,
         description: webhook.description || "",
         platform: webhook.platform,
-        flowId: webhook.flowId,
+        actionType: webhook.actionType || "flow",
+        flowId: webhook.flowId || "",
+        emailTemplateId: webhook.emailTemplateId || "",
+        emailSettings: webhook.emailSettings || {
+          sendDelay: 0,
+          delayType: "immediate",
+          fromName: "",
+          fromEmail: "",
+          replyTo: ""
+        },
         active: webhook.active
       });
       setSelectedWebhook(webhook);
@@ -184,7 +219,16 @@ const WebhookLinks = () => {
         name: "",
         description: "",
         platform: "generic",
+        actionType: "flow",
         flowId: "",
+        emailTemplateId: "",
+        emailSettings: {
+          sendDelay: 0,
+          delayType: "immediate",
+          fromName: "",
+          fromEmail: "",
+          replyTo: ""
+        },
         active: true
       });
       setSelectedWebhook(null);
@@ -199,14 +243,33 @@ const WebhookLinks = () => {
       name: "",
       description: "",
       platform: "generic",
+      actionType: "flow",
       flowId: "",
+      emailTemplateId: "",
+      emailSettings: {
+        sendDelay: 0,
+        delayType: "immediate",
+        fromName: "",
+        fromEmail: "",
+        replyTo: ""
+      },
       active: true
     });
   };
 
   const handleSaveWebhook = async () => {
-    if (!formData.name || !formData.flowId) {
-      toast.error("Nome e Flow são obrigatórios!");
+    if (!formData.name) {
+      toast.error("Nome é obrigatório!");
+      return;
+    }
+
+    if (formData.actionType === "flow" && !formData.flowId) {
+      toast.error("Flow Builder é obrigatório para ação de Flow!");
+      return;
+    }
+
+    if (formData.actionType === "email" && !formData.emailTemplateId) {
+      toast.error("Template de Email é obrigatório para ação de Email!");
       return;
     }
 
@@ -297,7 +360,7 @@ const WebhookLinks = () => {
               <TableRow>
                 <TableCell>Nome</TableCell>
                 <TableCell>Plataforma</TableCell>
-                <TableCell>Flow Builder</TableCell>
+                <TableCell>Tipo/Destino</TableCell>
                 <TableCell>Status</TableCell>
                 <TableCell>Requisições</TableCell>
                 <TableCell align="center">Ações</TableCell>
@@ -338,19 +401,48 @@ const WebhookLinks = () => {
                         />
                       </TableCell>
                       <TableCell>
-                        {webhook.flow ? (
-                          <Box>
-                            <Typography variant="body2">{webhook.flow.name}</Typography>
-                            <Chip
-                              size="small"
-                              label={webhook.flow.active ? "Ativo" : "Inativo"}
-                              color={webhook.flow.active ? "primary" : "default"}
-                            />
-                          </Box>
+                        {webhook.actionType === "email" ? (
+                          webhook.emailTemplate ? (
+                            <Box>
+                              <Box display="flex" alignItems="center" gap={0.5}>
+                                <EmailIcon fontSize="small" color="action" />
+                                <Typography variant="body2">{webhook.emailTemplate.name}</Typography>
+                              </Box>
+                              <Chip
+                                size="small"
+                                label={webhook.emailTemplate.active ? "Ativo" : "Inativo"}
+                                color={webhook.emailTemplate.active ? "primary" : "default"}
+                              />
+                            </Box>
+                          ) : (
+                            <Box display="flex" alignItems="center" gap={0.5}>
+                              <EmailIcon fontSize="small" color="error" />
+                              <Typography variant="body2" color="error">
+                                Template não encontrado
+                              </Typography>
+                            </Box>
+                          )
                         ) : (
-                          <Typography variant="body2" color="error">
-                            Flow não encontrado
-                          </Typography>
+                          webhook.flow ? (
+                            <Box>
+                              <Box display="flex" alignItems="center" gap={0.5}>
+                                <FlowIcon fontSize="small" color="action" />
+                                <Typography variant="body2">{webhook.flow.name}</Typography>
+                              </Box>
+                              <Chip
+                                size="small"
+                                label={webhook.flow.active ? "Ativo" : "Inativo"}
+                                color={webhook.flow.active ? "primary" : "default"}
+                              />
+                            </Box>
+                          ) : (
+                            <Box display="flex" alignItems="center" gap={0.5}>
+                              <FlowIcon fontSize="small" color="error" />
+                              <Typography variant="body2" color="error">
+                                Flow não encontrado
+                              </Typography>
+                            </Box>
+                          )
                         )}
                       </TableCell>
                       <TableCell>
@@ -448,6 +540,42 @@ const WebhookLinks = () => {
               />
             </Grid>
 
+            <Grid item xs={12}>
+              <Typography variant="subtitle1" gutterBottom>
+                Tipo de Ação
+              </Typography>
+              <RadioGroup
+                row
+                value={formData.actionType}
+                onChange={(e) => setFormData({ ...formData, actionType: e.target.value })}
+              >
+                <FormControlLabel
+                  value="flow"
+                  control={<Radio color="primary" />}
+                  label={
+                    <Box display="flex" alignItems="center">
+                      <FlowIcon style={{ marginRight: 4 }} />
+                      Flow Builder
+                    </Box>
+                  }
+                />
+                <FormControlLabel
+                  value="email"
+                  control={<Radio color="primary" />}
+                  label={
+                    <Box display="flex" alignItems="center">
+                      <EmailIcon style={{ marginRight: 4 }} />
+                      Email Template
+                    </Box>
+                  }
+                />
+              </RadioGroup>
+            </Grid>
+
+            <Grid item xs={12}>
+              <Divider />
+            </Grid>
+
             <Grid item xs={12} md={6}>
               <FormControl fullWidth variant="outlined">
                 <InputLabel>Plataforma de Pagamento</InputLabel>
@@ -465,25 +593,149 @@ const WebhookLinks = () => {
               </FormControl>
             </Grid>
 
-            <Grid item xs={12} md={6}>
-              <FormControl fullWidth variant="outlined" required>
-                <InputLabel>Flow Builder</InputLabel>
-                <Select
-                  value={formData.flowId}
-                  onChange={(e) => setFormData({ ...formData, flowId: e.target.value })}
-                  label="Flow Builder"
-                >
-                  <MenuItem value="">
-                    <em>Selecione um flow</em>
-                  </MenuItem>
-                  {flows.map((flow) => (
-                    <MenuItem key={flow.id} value={flow.id}>
-                      {flow.name} {!flow.active && "(Inativo)"}
+            {formData.actionType === "flow" ? (
+              <Grid item xs={12} md={6}>
+                <FormControl fullWidth variant="outlined" required>
+                  <InputLabel>Flow Builder</InputLabel>
+                  <Select
+                    value={formData.flowId}
+                    onChange={(e) => setFormData({ ...formData, flowId: e.target.value })}
+                    label="Flow Builder"
+                  >
+                    <MenuItem value="">
+                      <em>Selecione um flow</em>
                     </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
+                    {flows.map((flow) => (
+                      <MenuItem key={flow.id} value={flow.id}>
+                        {flow.name} {!flow.active && "(Inativo)"}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+            ) : (
+              <>
+                <Grid item xs={12} md={6}>
+                  <FormControl fullWidth variant="outlined" required>
+                    <InputLabel>Template de Email</InputLabel>
+                    <Select
+                      value={formData.emailTemplateId}
+                      onChange={(e) => setFormData({ ...formData, emailTemplateId: e.target.value })}
+                      label="Template de Email"
+                    >
+                      <MenuItem value="">
+                        <em>Selecione um template</em>
+                      </MenuItem>
+                      {emailTemplates.map((template) => (
+                        <MenuItem key={template.id} value={template.id}>
+                          {template.name} {!template.active && "(Inativo)"}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Grid>
+
+                <Grid item xs={12}>
+                  <Typography variant="subtitle2" gutterBottom>
+                    Configurações de Envio
+                  </Typography>
+                </Grid>
+
+                <Grid item xs={12} md={4}>
+                  <TextField
+                    fullWidth
+                    label="Atraso no Envio"
+                    type="number"
+                    value={formData.emailSettings.sendDelay}
+                    onChange={(e) => setFormData({
+                      ...formData,
+                      emailSettings: {
+                        ...formData.emailSettings,
+                        sendDelay: parseInt(e.target.value) || 0
+                      }
+                    })}
+                    variant="outlined"
+                    InputProps={{
+                      inputProps: { min: 0 }
+                    }}
+                  />
+                </Grid>
+
+                <Grid item xs={12} md={4}>
+                  <FormControl fullWidth variant="outlined">
+                    <InputLabel>Tipo de Atraso</InputLabel>
+                    <Select
+                      value={formData.emailSettings.delayType}
+                      onChange={(e) => setFormData({
+                        ...formData,
+                        emailSettings: {
+                          ...formData.emailSettings,
+                          delayType: e.target.value
+                        }
+                      })}
+                      label="Tipo de Atraso"
+                    >
+                      <MenuItem value="immediate">Imediato</MenuItem>
+                      <MenuItem value="seconds">Segundos</MenuItem>
+                      <MenuItem value="minutes">Minutos</MenuItem>
+                      <MenuItem value="hours">Horas</MenuItem>
+                      <MenuItem value="days">Dias</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Grid>
+
+                <Grid item xs={12} md={4}>
+                  <TextField
+                    fullWidth
+                    label="Nome do Remetente"
+                    value={formData.emailSettings.fromName}
+                    onChange={(e) => setFormData({
+                      ...formData,
+                      emailSettings: {
+                        ...formData.emailSettings,
+                        fromName: e.target.value
+                      }
+                    })}
+                    variant="outlined"
+                    helperText="Ex: Equipe de Vendas"
+                  />
+                </Grid>
+
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    label="Email do Remetente"
+                    value={formData.emailSettings.fromEmail}
+                    onChange={(e) => setFormData({
+                      ...formData,
+                      emailSettings: {
+                        ...formData.emailSettings,
+                        fromEmail: e.target.value
+                      }
+                    })}
+                    variant="outlined"
+                    helperText="Ex: vendas@empresa.com"
+                  />
+                </Grid>
+
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    label="Email de Resposta"
+                    value={formData.emailSettings.replyTo}
+                    onChange={(e) => setFormData({
+                      ...formData,
+                      emailSettings: {
+                        ...formData.emailSettings,
+                        replyTo: e.target.value
+                      }
+                    })}
+                    variant="outlined"
+                    helperText="Ex: suporte@empresa.com"
+                  />
+                </Grid>
+              </>
+            )}
           </Grid>
 
           {selectedWebhook && (
@@ -517,6 +769,21 @@ const WebhookLinks = () => {
                 3. Configure a URL do webhook nas configurações
                 <br />
                 4. Teste enviando um evento para verificar funcionamento
+                <br />
+                <br />
+                {formData.actionType === "email" ? (
+                  <>
+                    <strong>📧 Modo Email:</strong> Quando um evento for recebido, o sistema enviará
+                    automaticamente o template de email selecionado para o cliente, usando as variáveis
+                    do webhook (nome, email, produto, etc.).
+                  </>
+                ) : (
+                  <>
+                    <strong>🔄 Modo Flow:</strong> Quando um evento for recebido, o sistema executará
+                    o Flow Builder selecionado, criando um ticket e enviando mensagens automáticas
+                    via WhatsApp.
+                  </>
+                )}
               </Typography>
             </CardContent>
           </Card>

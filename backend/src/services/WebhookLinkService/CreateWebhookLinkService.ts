@@ -1,12 +1,24 @@
 import WebhookLink from "../../models/WebhookLink";
 import { FlowBuilderModel } from "../../models/FlowBuilder";
+import EmailTemplate from "../../models/EmailTemplate";
 import AppError from "../../errors/AppError";
+
+interface EmailSettings {
+  sendDelay: number;
+  delayType: "immediate" | "seconds" | "minutes" | "hours" | "days";
+  fromName: string;
+  fromEmail: string;
+  replyTo: string;
+}
 
 interface Request {
   name: string;
   description?: string;
   platform: string;
-  flowId: number;
+  actionType?: "flow" | "email";
+  flowId?: number;
+  emailTemplateId?: number;
+  emailSettings?: EmailSettings;
   companyId: number;
   userId: number;
 }
@@ -15,21 +27,47 @@ const CreateWebhookLinkService = async ({
   name,
   description,
   platform,
+  actionType = "flow",
   flowId,
+  emailTemplateId,
+  emailSettings,
   companyId,
   userId
 }: Request): Promise<WebhookLink> => {
-  
-  // Verificar se o flow existe e pertence à empresa
-  const flow = await FlowBuilderModel.findOne({
-    where: {
-      id: flowId,
-      company_id: companyId
-    }
-  });
 
-  if (!flow) {
-    throw new AppError("ERR_FLOW_NOT_FOUND", 404);
+  // Validar baseado no tipo de ação
+  if (actionType === "flow") {
+    if (!flowId) {
+      throw new AppError("ERR_FLOW_REQUIRED", 400);
+    }
+
+    // Verificar se o flow existe e pertence à empresa
+    const flow = await FlowBuilderModel.findOne({
+      where: {
+        id: flowId,
+        company_id: companyId
+      }
+    });
+
+    if (!flow) {
+      throw new AppError("ERR_FLOW_NOT_FOUND", 404);
+    }
+  } else if (actionType === "email") {
+    if (!emailTemplateId) {
+      throw new AppError("ERR_EMAIL_TEMPLATE_REQUIRED", 400);
+    }
+
+    // Verificar se o template existe e pertence à empresa
+    const emailTemplate = await EmailTemplate.findOne({
+      where: {
+        id: emailTemplateId,
+        companyId
+      }
+    });
+
+    if (!emailTemplate) {
+      throw new AppError("ERR_EMAIL_TEMPLATE_NOT_FOUND", 404);
+    }
   }
 
   // Verificar se já existe um webhook com o mesmo nome para a empresa
@@ -49,20 +87,28 @@ const CreateWebhookLinkService = async ({
     name,
     description,
     platform,
-    flowId,
+    actionType,
+    flowId: actionType === "flow" ? flowId : null,
+    emailTemplateId: actionType === "email" ? emailTemplateId : null,
+    emailSettings: actionType === "email" ? emailSettings : null,
     companyId,
     userId,
     active: true,
     metadata: {}
   });
 
-  // Retornar com dados do flow
+  // Retornar com dados do flow ou template
   return await WebhookLink.findByPk(webhookLink.id, {
     include: [
       {
         model: FlowBuilderModel,
         as: 'flow',
         attributes: ['id', 'name', 'active']
+      },
+      {
+        model: EmailTemplate,
+        as: 'emailTemplate',
+        attributes: ['id', 'name', 'subject', 'active']
       }
     ]
   });

@@ -1,13 +1,25 @@
 import { Op } from "sequelize";
 import WebhookLink from "../../models/WebhookLink";
 import { FlowBuilderModel } from "../../models/FlowBuilder";
+import EmailTemplate from "../../models/EmailTemplate";
 import AppError from "../../errors/AppError";
+
+interface EmailSettings {
+  sendDelay: number;
+  delayType: "immediate" | "seconds" | "minutes" | "hours" | "days";
+  fromName: string;
+  fromEmail: string;
+  replyTo: string;
+}
 
 interface UpdateData {
   name?: string;
   description?: string;
   platform?: string;
+  actionType?: "flow" | "email";
   flowId?: number;
+  emailTemplateId?: number;
+  emailSettings?: EmailSettings;
   active?: boolean;
   metadata?: object;
 }
@@ -36,6 +48,26 @@ const UpdateWebhookLinkService = async ({
     throw new AppError("ERR_WEBHOOK_NOT_FOUND", 404);
   }
 
+  // Validar baseado no tipo de ação
+  if (updateData.actionType) {
+    if (updateData.actionType === "flow") {
+      // Se mudando para flow, limpar campos de email
+      updateData.emailTemplateId = null;
+      updateData.emailSettings = null;
+
+      if (!updateData.flowId) {
+        throw new AppError("ERR_FLOW_REQUIRED", 400);
+      }
+    } else if (updateData.actionType === "email") {
+      // Se mudando para email, limpar campo de flow
+      updateData.flowId = null;
+
+      if (!updateData.emailTemplateId) {
+        throw new AppError("ERR_EMAIL_TEMPLATE_REQUIRED", 400);
+      }
+    }
+  }
+
   // Se estiver atualizando o flowId, verificar se existe
   if (updateData.flowId) {
     const flow = await FlowBuilderModel.findOne({
@@ -47,6 +79,20 @@ const UpdateWebhookLinkService = async ({
 
     if (!flow) {
       throw new AppError("ERR_FLOW_NOT_FOUND", 404);
+    }
+  }
+
+  // Se estiver atualizando o emailTemplateId, verificar se existe
+  if (updateData.emailTemplateId) {
+    const emailTemplate = await EmailTemplate.findOne({
+      where: {
+        id: updateData.emailTemplateId,
+        companyId
+      }
+    });
+
+    if (!emailTemplate) {
+      throw new AppError("ERR_EMAIL_TEMPLATE_NOT_FOUND", 404);
     }
   }
 
@@ -75,6 +121,11 @@ const UpdateWebhookLinkService = async ({
         model: FlowBuilderModel,
         as: 'flow',
         attributes: ['id', 'name', 'active']
+      },
+      {
+        model: EmailTemplate,
+        as: 'emailTemplate',
+        attributes: ['id', 'name', 'subject', 'active']
       }
     ]
   });
