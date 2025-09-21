@@ -188,9 +188,13 @@ const WebhookLinks = () => {
 
   const loadEmailTemplates = async () => {
     try {
+      console.log("🔍 Carregando email templates...");
       const { data } = await api.get("/email-templates");
+      console.log("📧 Email templates recebidos:", data);
       setEmailTemplates(data.templates || []);
+      console.log("✅ Templates carregados:", data.templates?.length || 0);
     } catch (err) {
+      console.error("❌ Erro ao carregar email templates:", err);
       toastError(err);
     }
   };

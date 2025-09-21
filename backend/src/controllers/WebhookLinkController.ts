@@ -1,5 +1,4 @@
 import { Request, Response } from "express";
-import WebhookLink from "../models/WebhookLink";
 import CreateWebhookLinkService from "../services/WebhookLinkService/CreateWebhookLinkService";
 import ListWebhookLinksService from "../services/WebhookLinkService/ListWebhookLinksService";
 import UpdateWebhookLinkService from "../services/WebhookLinkService/UpdateWebhookLinkService";
@@ -11,13 +10,17 @@ export const createWebhookLink = async (req: Request, res: Response): Promise<Re
   const { companyId } = req.user;
   const userId = parseInt(req.user.id);
 
+  // Converter strings vazias para null/undefined
+  const parsedFlowId = flowId && flowId !== "" ? parseInt(flowId) : undefined;
+  const parsedEmailTemplateId = emailTemplateId && emailTemplateId !== "" ? parseInt(emailTemplateId) : undefined;
+
   const webhookLink = await CreateWebhookLinkService({
     name,
     description,
     platform,
     actionType,
-    flowId,
-    emailTemplateId,
+    flowId: parsedFlowId,
+    emailTemplateId: parsedEmailTemplateId,
     emailSettings,
     companyId,
     userId
@@ -55,6 +58,19 @@ export const updateWebhookLink = async (req: Request, res: Response): Promise<Re
   const { webhookLinkId } = req.params;
   const { companyId } = req.user;
   const updateData = req.body;
+
+  // Converter strings vazias para null/undefined em flowId e emailTemplateId
+  if (updateData.flowId === "") {
+    updateData.flowId = undefined;
+  } else if (updateData.flowId) {
+    updateData.flowId = parseInt(updateData.flowId);
+  }
+
+  if (updateData.emailTemplateId === "") {
+    updateData.emailTemplateId = undefined;
+  } else if (updateData.emailTemplateId) {
+    updateData.emailTemplateId = parseInt(updateData.emailTemplateId);
+  }
 
   const webhookLink = await UpdateWebhookLinkService({
     webhookLinkId: parseInt(webhookLinkId),
