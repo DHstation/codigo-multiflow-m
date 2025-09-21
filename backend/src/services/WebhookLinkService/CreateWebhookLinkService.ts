@@ -82,6 +82,15 @@ const CreateWebhookLinkService = async ({
     throw new AppError("ERR_WEBHOOK_NAME_EXISTS", 409);
   }
 
+  // Preparar emailSettings com valores padrão se necessário
+  const defaultEmailSettings = {
+    sendDelay: 0,
+    delayType: "immediate",
+    fromName: "",
+    fromEmail: "",
+    replyTo: ""
+  };
+
   // Criar o webhook link
   const webhookLink = await WebhookLink.create({
     name,
@@ -90,7 +99,7 @@ const CreateWebhookLinkService = async ({
     actionType,
     flowId: actionType === "flow" ? flowId : null,
     emailTemplateId: actionType === "email" ? emailTemplateId : null,
-    emailSettings: actionType === "email" ? emailSettings : null,
+    emailSettings: actionType === "email" ? (emailSettings || defaultEmailSettings) : null,
     companyId,
     userId,
     active: true,

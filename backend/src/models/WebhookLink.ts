@@ -58,14 +58,23 @@ export class WebhookLink extends Model<WebhookLink> {
   actionType: string;
 
   @ForeignKey(() => FlowBuilderModel)
-  @Column
+  @Column({
+    type: DataType.INTEGER,
+    allowNull: true
+  })
   flowId: number;
 
   @ForeignKey(() => EmailTemplate)
-  @Column
+  @Column({
+    type: DataType.INTEGER,
+    allowNull: true
+  })
   emailTemplateId: number;
 
-  @Column(DataType.JSON)
+  @Column({
+    type: DataType.JSON,
+    allowNull: true
+  })
   emailSettings: EmailSettings;
 
   @Column
