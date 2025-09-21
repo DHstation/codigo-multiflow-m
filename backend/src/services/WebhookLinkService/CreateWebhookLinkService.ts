@@ -34,9 +34,14 @@ const CreateWebhookLinkService = async ({
   companyId,
   userId
 }: Request): Promise<WebhookLink> => {
+  try {
+    console.log("🏭 CREATE SERVICE - Start");
+    console.log("📦 Received params:", {
+      name, description, platform, actionType, flowId, emailTemplateId, emailSettings, companyId, userId
+    });
 
-  // Validar baseado no tipo de ação
-  if (actionType === "flow") {
+    // Validar baseado no tipo de ação
+    if (actionType === "flow") {
     if (!flowId) {
       throw new AppError("ERR_FLOW_REQUIRED", 400);
     }
@@ -106,21 +111,35 @@ const CreateWebhookLinkService = async ({
     metadata: {}
   });
 
-  // Retornar com dados do flow ou template
-  return await WebhookLink.findByPk(webhookLink.id, {
-    include: [
-      {
-        model: FlowBuilderModel,
-        as: 'flow',
-        attributes: ['id', 'name', 'active']
-      },
-      {
-        model: EmailTemplate,
-        as: 'emailTemplate',
-        attributes: ['id', 'name', 'subject', 'active']
-      }
-    ]
-  });
+    console.log("💾 Webhook created successfully:", webhookLink.id);
+
+    // Retornar com dados do flow ou template
+    const result = await WebhookLink.findByPk(webhookLink.id, {
+      include: [
+        {
+          model: FlowBuilderModel,
+          as: 'flow',
+          attributes: ['id', 'name', 'active']
+        },
+        {
+          model: EmailTemplate,
+          as: 'emailTemplate',
+          attributes: ['id', 'name', 'subject', 'active']
+        }
+      ]
+    });
+
+    console.log("✅ CREATE SERVICE - Success");
+    return result;
+  } catch (error) {
+    console.error("❌ CREATE SERVICE - Error:", error);
+    console.error("📄 Service Error details:", {
+      message: error.message,
+      stack: error.stack,
+      name: error.name
+    });
+    throw error;
+  }
 };
 
 export default CreateWebhookLinkService;
