@@ -7,7 +7,7 @@ import DeleteWebhookLinkService from "../services/WebhookLinkService/DeleteWebho
 import ShowWebhookLinkService from "../services/WebhookLinkService/ShowWebhookLinkService";
 
 export const createWebhookLink = async (req: Request, res: Response): Promise<Response> => {
-  const { name, description, platform, flowId } = req.body;
+  const { name, description, platform, actionType, flowId, emailTemplateId, emailSettings } = req.body;
   const { companyId } = req.user;
   const userId = parseInt(req.user.id);
 
@@ -15,7 +15,10 @@ export const createWebhookLink = async (req: Request, res: Response): Promise<Re
     name,
     description,
     platform,
+    actionType,
     flowId,
+    emailTemplateId,
+    emailSettings,
     companyId,
     userId
   });
