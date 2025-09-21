@@ -34,6 +34,18 @@ module.exports = {
       }
     });
 
+    // CORRIGIR: Alterar flowId para permitir null (para webhooks de email)
+    await queryInterface.changeColumn("WebhookLinks", "flowId", {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: "FlowBuilders",
+        key: "id"
+      },
+      onUpdate: "CASCADE",
+      onDelete: "SET NULL"
+    });
+
     // Criar índice
     await queryInterface.addIndex("WebhookLinks", ["emailTemplateId"]);
   },
